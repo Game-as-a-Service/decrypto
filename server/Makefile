@@ -81,3 +81,6 @@ help:
 	{ lastLine = $$0 }' $(MAKEFILE_LIST)
 
 .DEFAULT_GOAL := help
+
+test:
+	go test -v ./... -cover
