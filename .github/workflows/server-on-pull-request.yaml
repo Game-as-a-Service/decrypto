@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    paths:
+      - server/**
+    branches:
+      - master
+      - main
+  pull_request:
+    paths:
+      - server/**
+    branches:
+      - master
+      - main
+
+jobs:
+  on-pull-request:
+    name: test
+    strategy:
+      matrix:
+        go-version:
+          - 1.20.x
+        os: [ ubuntu-latest ]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@master
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go-version }}
+
+      - run: go env
+
+      - name: Cache deps
+        uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Install Server deps
+        run: cd server && go mod download
+
+      - name: Test Server
+        run: make server_test
